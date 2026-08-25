@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design tokens — Indigo/Violet "brand" scale + warm-neutral
+   "ink" scale, mapped to semantic tokens below. Single theme
+   (light) only — no dark mode.
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand (indigo → violet) */
+  --brand-50: #f1effe;
+  --brand-100: #e4e0fd;
+  --brand-200: #c9c1fb;
+  --brand-300: #a99cf7;
+  --brand-400: #8b7af3;
+  --brand-500: #6c4df0;
+  --brand-600: #5b34e0;
+  --brand-700: #4a28be;
+  --brand-800: #3b2098;
+  --brand-900: #2e1a78;
+  --brand-950: #1d1050;
+
+  /* Ink (warm-tinted neutral) */
+  --ink-50: #f8f7fb;
+  --ink-100: #f1eff7;
+  --ink-200: #e4e1ee;
+  --ink-300: #cfcadd;
+  --ink-400: #a29cb8;
+  --ink-500: #7a7492;
+  --ink-600: #5c566f;
+  --ink-700: #443f55;
+  --ink-800: #2e2a3b;
+  --ink-900: #1c1926;
+  --ink-950: #100e17;
+
+  /* Semantic accents */
+  --success-500: #10b981;
+  --success-600: #059669;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --danger-500: #f43f5e;
+  --danger-600: #e11d48;
+  --info-500: #0ea5e9;
+  --info-600: #0284c7;
+
+  /* Semantic surface/text tokens */
+  --background: var(--ink-50);
+  --surface: #ffffff;
+  --surface-2: var(--ink-100);
+  --surface-glass: color-mix(in srgb, #ffffff 72%, transparent);
+  --border: var(--ink-200);
+  --border-strong: var(--ink-300);
+  --text: var(--ink-900);
+  --text-muted: var(--ink-500);
+  --text-faint: var(--ink-400);
+  --primary: var(--brand-600);
+  --primary-hover: var(--brand-700);
+  --primary-soft: var(--brand-50);
+  --primary-soft-text: var(--brand-700);
+  --ring: var(--brand-400);
+  --shadow-color: 234 60% 30%;
 }
 
 @theme inline {
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+
+  --color-ink-50: var(--ink-50);
+  --color-ink-100: var(--ink-100);
+  --color-ink-200: var(--ink-200);
+  --color-ink-300: var(--ink-300);
+  --color-ink-400: var(--ink-400);
+  --color-ink-500: var(--ink-500);
+  --color-ink-600: var(--ink-600);
+  --color-ink-700: var(--ink-700);
+  --color-ink-800: var(--ink-800);
+  --color-ink-900: var(--ink-900);
+  --color-ink-950: var(--ink-950);
+
+  --color-success: var(--success-500);
+  --color-success-strong: var(--success-600);
+  --color-warning: var(--warning-500);
+  --color-warning-strong: var(--warning-600);
+  --color-danger: var(--danger-500);
+  --color-danger-strong: var(--danger-600);
+  --color-info: var(--info-500);
+  --color-info-strong: var(--info-600);
+
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-glass: var(--surface-glass);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-text: var(--primary-soft-text);
+  --color-ring: var(--ring);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Soft, colored shadow utilities — enterprise apps read as "premium" partly
+   because shadows aren't flat black; they pick up a hint of the brand hue. */
+.shadow-soft {
+  box-shadow:
+    0 1px 2px hsl(var(--shadow-color) / 0.06),
+    0 8px 24px -8px hsl(var(--shadow-color) / 0.12);
+}
+
+.shadow-soft-lg {
+  box-shadow:
+    0 2px 4px hsl(var(--shadow-color) / 0.08),
+    0 16px 40px -12px hsl(var(--shadow-color) / 0.18);
+}
+
+/* Glass surface for floating/overlay chrome (topbar, command palette, popovers)
+   — used deliberately, not on every card. */
+.glass {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Custom Scrollbar for sleek UI cards & navigation */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
