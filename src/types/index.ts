@@ -17,7 +17,7 @@ export type EmploymentStatus = "Permanent" | "Contract" | "Probation";
  *                 (matched via `supervisorId`); sees own + team payroll.
  * Employee     — self-service only: own attendance, own leave, own payslips.
  */
-export type Role = "Admin" | "HR" | "Manager" | "Employee";
+export type Role = "Admin" | "HR" | "Finance" | "IT Admin" | "Manager" | "Employee";
 
 export interface Employee {
   id: string;
@@ -307,5 +307,58 @@ export interface NotificationItem {
   read: boolean;
   category: NotificationCategory;
   link?: string;
+}
+
+// ---------- Expense & Reimbursement Claims ----------
+
+export type ExpenseCategory =
+  | "Travel"
+  | "Meals & Entertainment"
+  | "Office Supplies"
+  | "Internet & Phone"
+  | "Training"
+  | "Other";
+
+export type ExpenseStatus = "Pending" | "Approved" | "Rejected" | "Reimbursed";
+
+export interface ExpenseClaim {
+  id: string;
+  employeeId: string;
+  title: string;
+  category: ExpenseCategory;
+  amount: number;
+  date: string;
+  description: string;
+  status: ExpenseStatus;
+  submittedOn: string;
+  approvedBy?: string | null;
+  approvedOn?: string | null;
+}
+
+// ---------- Internal Helpdesk & Support Tickets ----------
+
+export type TicketCategory =
+  | "IT & Hardware"
+  | "Software & Access"
+  | "HR & Workplace"
+  | "Payroll & Benefits"
+  | "Facilities";
+
+export type TicketPriority = "Urgent" | "High" | "Medium" | "Low";
+
+export type TicketStatus = "Open" | "In Progress" | "Resolved";
+
+export interface SupportTicket {
+  id: string;
+  ticketCode: string;
+  employeeId: string;
+  subject: string;
+  category: TicketCategory;
+  priority: TicketPriority;
+  status: TicketStatus;
+  description: string;
+  createdAt: string;
+  resolvedAt?: string | null;
+  assignedTo?: string | null;
 }
 

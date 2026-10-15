@@ -8,7 +8,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import { formatCurrency, formatDate, formatMonth, formatTime, workHours } from "@/lib/format";
-import { findShift, serviceLength } from "@/lib/hr";
+import { findShift, isAdminOrHR, serviceLength } from "@/lib/hr";
 
 export default function EmployeeProfilePage({
   params,
@@ -16,19 +16,24 @@ export default function EmployeeProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { employees, attendance, leaveRequests, payrollRecords, shifts } = useAppData();
+  const { employees, attendance, leaveRequests, payrollRecords, shifts, activeEmployee } = useAppData();
 
   const employee = employees.find((e) => e.id === id);
   if (!employee) notFound();
+
+  const canViewPayroll =
+    isAdminOrHR(activeEmployee.role) || activeEmployee.role === "Finance" || activeEmployee.id === id;
 
   const empAttendance = attendance
     .filter((a) => a.employeeId === id)
     .sort((a, b) => (a.date < b.date ? 1 : -1))
     .slice(0, 10);
   const empLeave = leaveRequests.filter((l) => l.employeeId === id);
-  const empPayroll = payrollRecords
-    .filter((p) => p.employeeId === id)
-    .sort((a, b) => (a.month < b.month ? 1 : -1));
+  const empPayroll = canViewPayroll
+    ? payrollRecords
+        .filter((p) => p.employeeId === id)
+        .sort((a, b) => (a.month < b.month ? 1 : -1))
+    : [];
   const supervisor = employee.supervisorId
     ? employees.find((e) => e.id === employee.supervisorId)
     : undefined;
@@ -205,51 +210,53 @@ export default function EmployeeProfilePage({
           </div>
         </Card>
 
-        <Card padded={false} className="xl:col-span-2">
-          <div className="border-b border-slate-100 px-5 py-4">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Payroll History
-            </h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-xs uppercase tracking-wide text-slate-400">
-                  <th className="px-5 py-2.5 font-medium">Month</th>
-                  <th className="px-5 py-2.5 font-medium">Basic</th>
-                  <th className="px-5 py-2.5 font-medium">Gross</th>
-                  <th className="px-5 py-2.5 font-medium">Deductions</th>
-                  <th className="px-5 py-2.5 font-medium">Net Pay</th>
-                  <th className="px-5 py-2.5 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {empPayroll.map((p) => (
-                  <tr key={p.id}>
-                    <td className="px-5 py-2.5 text-slate-600">
-                      {formatMonth(p.month)}
-                    </td>
-                    <td className="px-5 py-2.5 text-slate-500">
-                      {formatCurrency(p.basicSalary)}
-                    </td>
-                    <td className="px-5 py-2.5 text-emerald-600">
-                      {formatCurrency(p.grossPay)}
-                    </td>
-                    <td className="px-5 py-2.5 text-rose-600">
-                      -{formatCurrency(p.totalDeductions)}
-                    </td>
-                    <td className="px-5 py-2.5 font-medium text-slate-800">
-                      {formatCurrency(p.netPay)}
-                    </td>
-                    <td className="px-5 py-2.5">
-                      <Badge label={p.status} />
-                    </td>
+        {canViewPayroll && (
+          <Card padded={false} className="xl:col-span-2">
+            <div className="border-b border-slate-100 px-5 py-4">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Payroll History
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="text-xs uppercase tracking-wide text-slate-400">
+                    <th className="px-5 py-2.5 font-medium">Month</th>
+                    <th className="px-5 py-2.5 font-medium">Basic</th>
+                    <th className="px-5 py-2.5 font-medium">Gross</th>
+                    <th className="px-5 py-2.5 font-medium">Deductions</th>
+                    <th className="px-5 py-2.5 font-medium">Net Pay</th>
+                    <th className="px-5 py-2.5 font-medium">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {empPayroll.map((p) => (
+                    <tr key={p.id}>
+                      <td className="px-5 py-2.5 text-slate-600">
+                        {formatMonth(p.month)}
+                      </td>
+                      <td className="px-5 py-2.5 text-slate-500">
+                        {formatCurrency(p.basicSalary)}
+                      </td>
+                      <td className="px-5 py-2.5 text-emerald-600">
+                        {formatCurrency(p.grossPay)}
+                      </td>
+                      <td className="px-5 py-2.5 text-rose-600">
+                        -{formatCurrency(p.totalDeductions)}
+                      </td>
+                      <td className="px-5 py-2.5 font-medium text-slate-800">
+                        {formatCurrency(p.netPay)}
+                      </td>
+                      <td className="px-5 py-2.5">
+                        <Badge label={p.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

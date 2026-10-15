@@ -58,14 +58,16 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     { label: "Employee Directory", href: "/employees", icon: "👥" },
     { label: "Attendance Logs & Punch", href: "/attendance", icon: "⏰" },
     { label: "Projects & Kanban Board", href: "/projects", icon: "🗂️" },
-    ...(activeEmployee.role !== "Employee"
+    ...(activeEmployee.role !== "Employee" && activeEmployee.role !== "IT Admin"
       ? [{ label: "Executive Reports & Analytics", href: "/reports", icon: "📈" }]
       : []),
     { label: "Leave Requests & Approvals", href: "/leave", icon: "📅" },
     { label: "Payroll Records", href: "/payroll", icon: "💳" },
+    { label: "Expense Claims & Reimbursement", href: "/expenses", icon: "💰" },
     { label: "Company Assets", href: "/assets", icon: "💻" },
     { label: "Document Hub", href: "/documents", icon: "📁" },
     { label: "Performance Reviews", href: "/performance", icon: "⭐" },
+    { label: "Internal Helpdesk & Support", href: "/helpdesk", icon: "🎫" },
   ];
 
   const filteredPages = q
@@ -79,9 +81,12 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/50 pt-20 backdrop-blur-xs transition-all animate-in fade-in duration-150">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/40 pt-20 backdrop-blur-sm transition-all animate-fade-in"
+    >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all animate-in zoom-in-95 duration-150"
+        className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-soft-lg backdrop-blur-2xl transition-all animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}

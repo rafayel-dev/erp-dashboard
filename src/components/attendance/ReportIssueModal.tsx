@@ -3,6 +3,14 @@
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAppData } from "@/context/AppDataContext";
 import { formatDate } from "@/lib/format";
 import type { AttendanceStatus } from "@/types";
@@ -77,32 +85,35 @@ export default function ReportIssueModal({
           </Field>
         </div>
         <Field label="Correct Status (optional)">
-          <select
-            className={inputClass}
-            value={reqStatus}
-            onChange={(e) => setReqStatus(e.target.value as AttendanceStatus | "")}
+          <Select
+            value={reqStatus || "none"}
+            onValueChange={(val) =>
+              setReqStatus(val === "none" ? "" : (val as AttendanceStatus))
+            }
           >
-            <option value="">No change</option>
-            <option value="Present">Present</option>
-            <option value="Late">Late</option>
-            <option value="Absent">Absent</option>
-            <option value="On Leave">On Leave</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="No change" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No change</SelectItem>
+              <SelectItem value="Present">Present</SelectItem>
+              <SelectItem value="Late">Late</SelectItem>
+              <SelectItem value="Absent">Absent</SelectItem>
+              <SelectItem value="On Leave">On Leave</SelectItem>
+            </SelectContent>
+          </Select>
         </Field>
         <div className="flex justify-end gap-3 pt-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
+          </Button>
+          <Button type="submit">
             Submit
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

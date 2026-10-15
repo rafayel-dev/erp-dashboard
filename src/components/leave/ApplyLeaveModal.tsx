@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import { useAppData } from "@/context/AppDataContext";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toLocalDateStr } from "@/lib/format";
 import type { Employee, LeaveType } from "@/types";
 
@@ -49,7 +57,7 @@ export default function ApplyLeaveModal({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.employeeId || !form.reason.trim()) return;
+    if (!form.employeeId || !form.reason.trim() || form.startDate > form.endDate) return;
     applyLeave({
       employeeId: form.employeeId,
       type: form.type,
@@ -66,17 +74,21 @@ export default function ApplyLeaveModal({
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Employee">
           {canPickEmployee ? (
-            <select
-              className={inputClass}
+            <Select
               value={form.employeeId}
-              onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
+              onValueChange={(val) => setForm({ ...form, employeeId: val })}
             >
-              {employees.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Employee" />
+              </SelectTrigger>
+              <SelectContent>
+                {employees.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ) : (
             <div className={`${inputClass} bg-slate-50 text-slate-500`}>
               {employees.find((e) => e.id === form.employeeId)?.name ?? "—"}
@@ -84,16 +96,20 @@ export default function ApplyLeaveModal({
           )}
         </Field>
         <Field label="Leave Type">
-          <select
-            className={inputClass}
+          <Select
             value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value as LeaveType })}
+            onValueChange={(val) => setForm({ ...form, type: val as LeaveType })}
           >
-            <option value="Sick">Sick</option>
-            <option value="Casual">Casual</option>
-            <option value="Annual">Annual</option>
-            <option value="Unpaid">Unpaid</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Leave Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Sick">Sick</SelectItem>
+              <SelectItem value="Casual">Casual</SelectItem>
+              <SelectItem value="Annual">Annual</SelectItem>
+              <SelectItem value="Unpaid">Unpaid</SelectItem>
+            </SelectContent>
+          </Select>
         </Field>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Start Date">
@@ -101,7 +117,14 @@ export default function ApplyLeaveModal({
               type="date"
               className={inputClass}
               value={form.startDate}
-              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+              onChange={(e) => {
+                const newStart = e.target.value;
+                setForm((prev) => ({
+                  ...prev,
+                  startDate: newStart,
+                  endDate: prev.endDate < newStart ? newStart : prev.endDate,
+                }));
+              }}
             />
           </Field>
           <Field label="End Date">
@@ -124,19 +147,12 @@ export default function ApplyLeaveModal({
           />
         </Field>
         <div className="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
+          </Button>
+          <Button type="submit">
             Submit Request
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

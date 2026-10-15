@@ -7,7 +7,15 @@ import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
-import { canCreateReviewFor, canViewReview } from "@/lib/hr";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { canCreateReviewFor, canViewReview, isAdminOrHR } from "@/lib/hr";
 import type { KpiItem, PerformanceReview } from "@/types";
 
 function Stars({ rating }: { rating: number }) {
@@ -27,6 +35,7 @@ export default function PerformancePage() {
     performanceReviews,
     activeEmployee,
     addReview,
+    updateReviewStatus,
     setEmployeeComments,
   } = useAppData();
 
@@ -88,6 +97,7 @@ export default function PerformancePage() {
   function handleAcknowledge() {
     if (!detail) return;
     setEmployeeComments(detail.id, employeeComment);
+    updateReviewStatus(detail.id, "Acknowledged");
     setDetail(null);
   }
 
@@ -101,12 +111,9 @@ export default function PerformancePage() {
             : "showing reviews about you."}
         </p>
         {canCreate && (
-          <button
-            onClick={openCreate}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
+          <Button onClick={openCreate}>
             + New Review
-          </button>
+          </Button>
         )}
       </div>
 
@@ -172,17 +179,21 @@ export default function PerformancePage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Field label="Employee">
-              <select
-                className={inputClass}
+              <Select
                 value={targetEmployeeId}
-                onChange={(e) => setTargetEmployeeId(e.target.value)}
+                onValueChange={(val) => setTargetEmployeeId(val)}
               >
-                {assignableEmployees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Employee" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assignableEmployees.map((emp) => (
+                    <SelectItem key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
             <Field label="Period">
               <input
@@ -208,7 +219,7 @@ export default function PerformancePage() {
             </div>
             <div className="space-y-3">
               {kpis.map((kpi, i) => (
-                <div key={i} className="grid grid-cols-12 gap-2 rounded-lg bg-slate-50 p-2">
+                <div key={i} className="grid grid-cols-12 gap-2 rounded-lg bg-slate-50 p-2 items-center">
                   <input
                     required
                     placeholder="KPI title"
@@ -224,21 +235,27 @@ export default function PerformancePage() {
                   />
                   <input
                     placeholder="Achieved"
-                    className={`${inputClass} col-span-3`}
+                    className={`${inputClass} col-span-2`}
                     value={kpi.achieved}
                     onChange={(e) => updateKpi(i, { achieved: e.target.value })}
                   />
-                  <select
-                    className={`${inputClass} col-span-1`}
-                    value={kpi.score}
-                    onChange={(e) => updateKpi(i, { score: Number(e.target.value) })}
-                  >
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="col-span-2">
+                    <Select
+                      value={String(kpi.score)}
+                      onValueChange={(val) => updateKpi(i, { score: Number(val) })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Score" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={String(n)}>
+                            {n} ★
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setKpis((prev) => prev.filter((_, idx) => idx !== i))}
@@ -262,19 +279,16 @@ export default function PerformancePage() {
           </Field>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setOpen(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
+            </Button>
+            <Button type="submit">
               Submit Review
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>
@@ -358,20 +372,31 @@ export default function PerformancePage() {
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setDetail(null)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Close
-              </button>
+              </Button>
               {activeEmployee.id === detail.employeeId && detail.status === "Submitted" && (
-                <button
+                <Button
                   onClick={handleAcknowledge}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
-                  Acknowledge
-                </button>
+                  Sign &amp; Acknowledge
+                </Button>
               )}
+              {(isAdminOrHR(activeEmployee.role) || activeEmployee.id === detail.reviewerId) &&
+                detail.status === "Draft" && (
+                  <Button
+                    onClick={() => {
+                      updateReviewStatus(detail.id, "Submitted");
+                      setDetail(null);
+                    }}
+                  >
+                    Submit for Employee Review
+                  </Button>
+                )}
             </div>
           </div>
         )}

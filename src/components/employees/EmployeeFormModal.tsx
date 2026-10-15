@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { departments } from "@/lib/mockData";
 import type {
   Department,
@@ -115,17 +123,21 @@ export default function EmployeeFormModal({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Department">
-            <select
-              className={inputClass}
+            <Select
               value={form.department}
-              onChange={(e) => setForm({ ...form, department: e.target.value as Department })}
+              onValueChange={(val) => setForm({ ...form, department: val as Department })}
             >
-              {departments.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Department" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {d}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Position">
             <input
@@ -138,56 +150,76 @@ export default function EmployeeFormModal({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Role">
-            <select
-              className={inputClass}
+            <Select
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
+              onValueChange={(val) => setForm({ ...form, role: val as Role })}
             >
-              <option value="Employee">Employee</option>
-              <option value="Manager">Manager</option>
-              <option value="HR">HR</option>
-              <option value="Admin">Admin</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Employee">Employee</SelectItem>
+                <SelectItem value="Manager">Manager</SelectItem>
+                <SelectItem value="Finance">Finance</SelectItem>
+                <SelectItem value="IT Admin">IT Admin</SelectItem>
+                <SelectItem value="HR">HR</SelectItem>
+                <SelectItem value="Admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Reports To">
-            <select
-              className={inputClass}
-              value={form.supervisorId}
-              onChange={(e) => setForm({ ...form, supervisorId: e.target.value })}
+            <Select
+              value={form.supervisorId || "none"}
+              onValueChange={(val) =>
+                setForm({ ...form, supervisorId: val === "none" ? "" : val })
+              }
             >
-              <option value="">— None —</option>
-              {supervisorChoices.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Supervisor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— None —</SelectItem>
+                {supervisorChoices.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Shift">
-            <select
-              className={inputClass}
+            <Select
               value={form.shiftId}
-              onChange={(e) => setForm({ ...form, shiftId: e.target.value })}
+              onValueChange={(val) => setForm({ ...form, shiftId: val })}
             >
-              {shifts.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.startTime}–{s.endTime})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Shift" />
+              </SelectTrigger>
+              <SelectContent>
+                {shifts.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name} ({s.startTime}–{s.endTime})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Status">
-            <select
-              className={inputClass}
+            <Select
               value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as EmployeeStatus })}
+              onValueChange={(val) => setForm({ ...form, status: val as EmployeeStatus })}
             >
-              <option value="Active">Active</option>
-              <option value="On Leave">On Leave</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="On Leave">On Leave</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -200,41 +232,36 @@ export default function EmployeeFormModal({
             />
           </Field>
           <Field label="Employment">
-            <select
-              className={inputClass}
+            <Select
               value={form.employmentStatus}
-              onChange={(e) =>
-                setForm({ ...form, employmentStatus: e.target.value as EmploymentStatus })
+              onValueChange={(val) =>
+                setForm({ ...form, employmentStatus: val as EmploymentStatus })
               }
             >
-              <option value="Permanent">Permanent</option>
-              <option value="Contract">Contract</option>
-              <option value="Probation">Probation</option>
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Employment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Permanent">Permanent</SelectItem>
+                <SelectItem value="Contract">Contract</SelectItem>
+                <SelectItem value="Probation">Probation</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Birthday">
             <input
               type="date"
               className={inputClass}
-              value={`2000-${form.birthday}`}
-              onChange={(e) => setForm({ ...form, birthday: e.target.value.slice(5) })}
+              value={form.birthday ? `2000-${form.birthday}` : ""}
+              onChange={(e) => setForm({ ...form, birthday: e.target.value ? e.target.value.slice(5) : "01-01" })}
             />
           </Field>
         </div>
         <div className="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            {submitLabel}
-          </button>
+          </Button>
+          <Button type="submit">{submitLabel}</Button>
         </div>
       </form>
     </Modal>

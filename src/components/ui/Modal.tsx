@@ -18,16 +18,16 @@ export default function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-ink-950/50"
+        className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity animate-fade-in"
         onClick={onClose}
         aria-hidden
       />
-      <div className="relative z-10 w-full max-w-lg rounded-xl border border-border bg-surface p-6 shadow-soft-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-text">{title}</h2>
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200/90 bg-white p-6 shadow-soft-lg animate-slide-up">
+        <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-3">
+          <h2 className="text-base font-extrabold tracking-tight text-slate-900">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-text-faint hover:bg-surface-2 hover:text-text-muted"
+            className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
             aria-label="Close"
           >
             <svg
@@ -36,7 +36,7 @@ export default function Modal({
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
-              className="h-5 w-5"
+              className="h-4 w-4"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>

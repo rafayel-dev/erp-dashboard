@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -27,6 +28,8 @@ import {
   projects as initialProjects,
   shifts as initialShifts,
   tasks as initialTasks,
+  initialExpenses,
+  initialTickets,
 } from "@/lib/mockData";
 import type {
   AdvanceRequest,
@@ -50,6 +53,10 @@ import type {
   Shift,
   Task,
   TaskStatus,
+  ExpenseClaim,
+  ExpenseStatus,
+  SupportTicket,
+  TicketStatus,
 } from "@/types";
 
 const SESSION_KEY = "erp_demo_session_employee_id";
@@ -84,6 +91,8 @@ interface AppDataContextValue {
   tasks: Task[];
   announcements: Announcement[];
   notifications: NotificationItem[];
+  expenses: ExpenseClaim[];
+  tickets: SupportTicket[];
 
   /** Whether we've finished checking localStorage for a saved session. */
   sessionChecked: boolean;
@@ -185,6 +194,12 @@ interface AppDataContextValue {
   addAnnouncement: (data: Omit<Announcement, "id" | "postedOn">) => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+
+  addExpense: (data: Omit<ExpenseClaim, "id" | "status" | "submittedOn">) => void;
+  updateExpenseStatus: (id: string, status: ExpenseStatus, approverId?: string) => void;
+  addTicket: (data: Omit<SupportTicket, "id" | "ticketCode" | "status" | "createdAt">) => void;
+  updateTicketStatus: (id: string, status: TicketStatus) => void;
+  resetAllData: () => void;
 }
 
 const AppDataContext = createContext<AppDataContextValue | undefined>(
@@ -232,18 +247,68 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
+  const [expenses, setExpenses] = useState<ExpenseClaim[]>(initialExpenses);
+  const [tickets, setTickets] = useState<SupportTicket[]>(initialTickets);
 
-  // ---- Auth (demo-only: no backend, no real security — see login()) ----
+  // ---- Auth & Persistence (demo-only localStorage synchronization) ----
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [viewAsId, setViewAsId] = useState<string | null>(null);
+  const isHydrated = useRef(false);
 
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(SESSION_KEY);
       if (saved) setSessionId(saved);
+
+      const load = <T,>(key: string, setter: (val: T) => void) => {
+        const item = window.localStorage.getItem(`erp_persist_${key}`);
+        if (item) {
+          try {
+            setter(JSON.parse(item));
+          } catch {}
+        }
+      };
+
+      load("employees", setEmployees);
+      load("attendance", setAttendance);
+      load("leaveRequests", setLeaveRequests);
+      load("payrollRecords", setPayrollRecords);
+      load("advanceRequests", setAdvanceRequests);
+      load("assets", setAssets);
+      load("tasks", setTasks);
+      load("expenses", setExpenses);
+      load("tickets", setTickets);
+      load("performanceReviews", setPerformanceReviews);
     } finally {
       setSessionChecked(true);
+      isHydrated.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated.current) return;
+    try {
+      window.localStorage.setItem("erp_persist_employees", JSON.stringify(employees));
+      window.localStorage.setItem("erp_persist_attendance", JSON.stringify(attendance));
+      window.localStorage.setItem("erp_persist_leaveRequests", JSON.stringify(leaveRequests));
+      window.localStorage.setItem("erp_persist_advanceRequests", JSON.stringify(advanceRequests));
+      window.localStorage.setItem("erp_persist_payrollRecords", JSON.stringify(payrollRecords));
+      window.localStorage.setItem("erp_persist_tasks", JSON.stringify(tasks));
+      window.localStorage.setItem("erp_persist_expenses", JSON.stringify(expenses));
+      window.localStorage.setItem("erp_persist_tickets", JSON.stringify(tickets));
+      window.localStorage.setItem("erp_persist_performanceReviews", JSON.stringify(performanceReviews));
+    } catch {}
+  }, [employees, attendance, leaveRequests, advanceRequests, payrollRecords, tasks, expenses, tickets, performanceReviews]);
+
+  const resetAllData = useCallback(() => {
+    if (typeof window !== "undefined") {
+      Object.keys(window.localStorage).forEach((key) => {
+        if (key.startsWith("erp_persist_") || key === SESSION_KEY) {
+          window.localStorage.removeItem(key);
+        }
+      });
+      window.location.reload();
     }
   }, []);
 
@@ -710,6 +775,65 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
 
+  const addExpense = useCallback(
+    (data: Omit<ExpenseClaim, "id" | "status" | "submittedOn">) => {
+      const newClaim: ExpenseClaim = {
+        ...data,
+        id: `exp-${Date.now()}`,
+        status: "Pending",
+        submittedOn: todayStr(),
+      };
+      setExpenses((prev) => [newClaim, ...prev]);
+    },
+    []
+  );
+
+  const updateExpenseStatus = useCallback(
+    (id: string, status: ExpenseStatus, approverId?: string) => {
+      setExpenses((prev) =>
+        prev.map((e) =>
+          e.id === id
+            ? {
+                ...e,
+                status,
+                approvedBy: approverId ?? e.approvedBy,
+                approvedOn: status === "Approved" || status === "Reimbursed" ? todayStr() : e.approvedOn,
+              }
+            : e
+        )
+      );
+    },
+    []
+  );
+
+  const addTicket = useCallback(
+    (data: Omit<SupportTicket, "id" | "ticketCode" | "status" | "createdAt">) => {
+      const newTicket: SupportTicket = {
+        ...data,
+        id: `tkt-${Date.now()}`,
+        ticketCode: `TKT-${Math.floor(100 + Math.random() * 900)}`,
+        status: "Open",
+        createdAt: new Date().toISOString(),
+      };
+      setTickets((prev) => [newTicket, ...prev]);
+    },
+    []
+  );
+
+  const updateTicketStatus = useCallback((id: string, status: TicketStatus) => {
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status,
+              resolvedAt: status === "Resolved" ? new Date().toISOString() : null,
+            }
+          : t
+      )
+    );
+  }, []);
+
   const value = useMemo<AppDataContextValue>(
     () => ({
       employees,
@@ -726,6 +850,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       tasks,
       announcements,
       notifications,
+      expenses,
+      tickets,
       sessionChecked,
       session,
       login,
@@ -767,6 +893,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       addAnnouncement,
       markNotificationRead,
       markAllNotificationsRead,
+      addExpense,
+      updateExpenseStatus,
+      addTicket,
+      updateTicketStatus,
+      resetAllData,
     }),
     [
       employees,
@@ -783,6 +914,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       tasks,
       announcements,
       notifications,
+      expenses,
+      tickets,
       sessionChecked,
       session,
       login,
@@ -823,6 +956,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       addAnnouncement,
       markNotificationRead,
       markAllNotificationsRead,
+      addExpense,
+      updateExpenseStatus,
+      addTicket,
+      updateTicketStatus,
+      resetAllData,
     ]
   );
 

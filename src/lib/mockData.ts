@@ -18,6 +18,8 @@ import type {
   Project,
   Shift,
   Task,
+  ExpenseClaim,
+  SupportTicket,
 } from "@/types";
 
 export const companyName = "RMNR";
@@ -98,7 +100,7 @@ const rawEmployees: Array<
     employmentStatus: "Permanent",
     supervisorId: "emp-1",
     birthday: "11-02",
-    role: "Manager",
+    role: "Finance",
     shiftId: "shift-morning",
   },
   {
@@ -182,7 +184,7 @@ const rawEmployees: Array<
     employmentStatus: "Contract",
     supervisorId: "emp-6",
     birthday: "09-10",
-    role: "Employee",
+    role: "IT Admin",
     shiftId: "shift-evening",
   },
   {
@@ -1007,4 +1009,125 @@ export const initialNotifications: NotificationItem[] = [
     link: "/attendance",
   },
 ];
+
+// ---------- Expense Claims ----------
+
+export const initialExpenses: ExpenseClaim[] = [
+  {
+    id: "exp-1",
+    employeeId: "emp-4",
+    title: "Client Dinner with Enterprise Leads",
+    category: "Meals & Entertainment",
+    amount: 145.5,
+    date: "2026-09-02",
+    description: "Dinner discussion for annual enterprise contract onboarding at Bistro Lounge.",
+    status: "Approved",
+    submittedOn: "2026-09-03",
+    approvedBy: "emp-3",
+    approvedOn: "2026-09-04",
+  },
+  {
+    id: "exp-2",
+    employeeId: "emp-7",
+    title: "Monthly Home Office High-Speed Internet",
+    category: "Internet & Phone",
+    amount: 60.0,
+    date: "2026-09-01",
+    description: "Fiber internet bill reimbursement for on-call support duties.",
+    status: "Reimbursed",
+    submittedOn: "2026-09-01",
+    approvedBy: "emp-2",
+    approvedOn: "2026-09-02",
+  },
+  {
+    id: "exp-3",
+    employeeId: "emp-10",
+    title: "Inter-city Train Tickets for Regional Expo",
+    category: "Travel",
+    amount: 210.0,
+    date: "2026-09-04",
+    description: "Roundtrip express train tickets to attend the B2B tech symposium.",
+    status: "Pending",
+    submittedOn: "2026-09-05",
+  },
+  {
+    id: "exp-4",
+    employeeId: "emp-9",
+    title: "AWS Certified DevOps Engineer Exam Voucher",
+    category: "Training",
+    amount: 300.0,
+    date: "2026-08-28",
+    description: "Cloud architecture skill development certification sponsored under tech training budget.",
+    status: "Approved",
+    submittedOn: "2026-08-29",
+    approvedBy: "emp-1",
+    approvedOn: "2026-08-30",
+  },
+  {
+    id: "exp-5",
+    employeeId: "emp-6",
+    title: "Warehouse Inventory Barcode Scanner Cables",
+    category: "Office Supplies",
+    amount: 45.0,
+    date: "2026-09-03",
+    description: "Emergency replacement USB-C data cables for logistics handheld scanners.",
+    status: "Pending",
+    submittedOn: "2026-09-04",
+  },
+];
+
+// ---------- Internal Helpdesk Tickets ----------
+
+export const initialTickets: SupportTicket[] = [
+  {
+    id: "tkt-1",
+    ticketCode: "TKT-101",
+    employeeId: "emp-4",
+    subject: "Secondary 4K Monitor Flickering Issue",
+    category: "IT & Hardware",
+    priority: "High",
+    status: "In Progress",
+    description: "The Dell 27-inch secondary monitor keeps going black intermittently when connected via HDMI adapter.",
+    createdAt: "2026-09-04T09:15:00.000Z",
+    assignedTo: "emp-7",
+  },
+  {
+    id: "tkt-2",
+    ticketCode: "TKT-102",
+    employeeId: "emp-6",
+    subject: "Figma Enterprise License Access",
+    category: "Software & Access",
+    priority: "Medium",
+    status: "Open",
+    description: "Need editor seat access for Figma design system to inspect new portal mockups.",
+    createdAt: "2026-09-05T10:30:00.000Z",
+    assignedTo: "emp-1",
+  },
+  {
+    id: "tkt-3",
+    ticketCode: "TKT-103",
+    employeeId: "emp-10",
+    subject: "August Overtime Hours Discrepancy",
+    category: "Payroll & Benefits",
+    priority: "High",
+    status: "Open",
+    description: "My August payslip did not include the 6 hours of weekend deployment overtime approved on Aug 22.",
+    createdAt: "2026-09-05T11:00:00.000Z",
+    assignedTo: "emp-2",
+  },
+  {
+    id: "tkt-4",
+    ticketCode: "TKT-104",
+    employeeId: "emp-8",
+    subject: "Office Access Card Not Scanning at Gate B",
+    category: "Facilities",
+    priority: "Low",
+    status: "Resolved",
+    description: "RFID card fails to register at Gate B entrance turnstile. Re-magnetized card resolved.",
+    createdAt: "2026-09-02T08:00:00.000Z",
+    resolvedAt: "2026-09-03T14:20:00.000Z",
+    assignedTo: "emp-6",
+  },
+];
+
 

@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAppData } from "@/context/AppDataContext";
 import { formatDate } from "@/lib/format";
 import type { AttendanceIssue, AttendanceRecord, AttendanceStatus } from "@/types";
@@ -98,16 +106,20 @@ export default function CorrectionModal({
           </Field>
         </div>
         <Field label="Status">
-          <select
-            className={inputClass}
+          <Select
             value={status}
-            onChange={(e) => setStatus(e.target.value as AttendanceStatus)}
+            onValueChange={(val) => setStatus(val as AttendanceStatus)}
           >
-            <option value="Present">Present</option>
-            <option value="Late">Late</option>
-            <option value="Absent">Absent</option>
-            <option value="On Leave">On Leave</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Present">Present</SelectItem>
+              <SelectItem value="Late">Late</SelectItem>
+              <SelectItem value="Absent">Absent</SelectItem>
+              <SelectItem value="On Leave">On Leave</SelectItem>
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="Note">
           <textarea
@@ -120,27 +132,25 @@ export default function CorrectionModal({
         </Field>
         <div className="flex items-center justify-end gap-3 pt-2">
           {issue && (
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handleRejectIssue}
-              className="mr-auto rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
+              className="mr-auto border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
             >
               Reject Issue
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
+          </Button>
+          <Button type="submit">
             {issue ? "Resolve & Apply" : "Save Correction"}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

@@ -6,14 +6,15 @@ import Badge from "@/components/ui/Badge";
 import { useAppData } from "@/context/AppDataContext";
 import { buildMonthGrid, monthStats } from "@/lib/hr";
 import { formatDate, formatTime, workHours } from "@/lib/format";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const cellStyles: Record<string, string> = {
-  Present: "bg-emerald-50 text-emerald-700 border-emerald-100",
-  Late: "bg-amber-50 text-amber-700 border-amber-100",
-  "On Leave": "bg-sky-50 text-sky-700 border-sky-100",
-  Absent: "bg-rose-50 text-rose-700 border-rose-100",
+  Present: "bg-emerald-50 text-emerald-700 border-emerald-200/60 ring-1 ring-emerald-500/20",
+  Late: "bg-amber-50 text-amber-700 border-amber-200/60 ring-1 ring-amber-500/20",
+  "On Leave": "bg-sky-50 text-sky-700 border-sky-200/60 ring-1 ring-sky-500/20",
+  Absent: "bg-rose-50 text-rose-700 border-rose-200/60 ring-1 ring-rose-500/20",
   Weekend: "bg-slate-50 text-slate-400 border-slate-100",
 };
 
@@ -25,7 +26,7 @@ const recentBorder: Record<string, string> = {
 };
 
 const statLegend: { key: keyof ReturnType<typeof monthStats>; label: string; dot: string }[] = [
-  { key: "payable", label: "Payable Days", dot: "bg-slate-400" },
+  { key: "payable", label: "Payable", dot: "bg-slate-400" },
   { key: "present", label: "Present", dot: "bg-emerald-500" },
   { key: "late", label: "Late", dot: "bg-amber-500" },
   { key: "onLeave", label: "Leave", dot: "bg-sky-500" },
@@ -79,47 +80,61 @@ export default function AttendanceCalendarCard({
   });
 
   return (
-    <Card className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900">Attendance Overview</h2>
-        <div className="flex items-center gap-3">
+    <Card className="flex h-full flex-col border border-slate-200/80 shadow-soft">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+            <Calendar className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Attendance Log</h2>
+            <p className="text-[10px] text-slate-400">Monthly schedule and daily logs</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5">
           {view === "calendar" && (
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-1.5 text-xs">
               <button
                 onClick={() => shiftMonth(-1)}
                 aria-label="Previous month"
-                className="rounded-md border border-slate-200 px-2 py-1 text-slate-500 hover:bg-slate-50"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200/80 text-slate-600 hover:bg-slate-100 shadow-2xs"
               >
-                ‹
+                <ChevronLeft className="h-3.5 w-3.5" />
               </button>
-              <span className="min-w-[110px] text-center font-medium text-slate-700">
+              <span className="min-w-[95px] text-center font-bold text-xs text-slate-800">
                 {monthName} {year}
               </span>
               <button
                 onClick={() => shiftMonth(1)}
                 aria-label="Next month"
-                className="rounded-md border border-slate-200 px-2 py-1 text-slate-500 hover:bg-slate-50"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200/80 text-slate-600 hover:bg-slate-100 shadow-2xs"
               >
-                ›
+                <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
-          <div className="flex gap-1 rounded-lg bg-slate-100 p-1 text-xs font-medium">
+
+          <div className="flex gap-1 rounded-xl bg-slate-100/80 p-1 text-xs font-semibold">
             <button
               onClick={() => setView("calendar")}
-              className={`rounded-md px-2.5 py-1 transition-colors ${
-                view === "calendar" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
+              className={`rounded-lg px-2.5 py-1 transition-all ${
+                view === "calendar"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-800"
               }`}
             >
               Calendar
             </button>
             <button
               onClick={() => setView("recent")}
-              className={`rounded-md px-2.5 py-1 transition-colors ${
-                view === "recent" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
+              className={`rounded-lg px-2.5 py-1 transition-all ${
+                view === "recent"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              Recent Check-ins
+              Recent
             </button>
           </div>
         </div>
@@ -127,18 +142,18 @@ export default function AttendanceCalendarCard({
 
       {view === "calendar" ? (
         <>
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+          <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
             {statLegend.map(({ key, label, dot }) => (
-              <span key={key} className="flex items-center gap-1.5 text-slate-500">
+              <span key={key} className="flex items-center gap-1.5 text-[11px] text-slate-500">
                 <span className={`h-2 w-2 rounded-full ${dot}`} />
-                <span className="font-semibold text-slate-800">{stats[key]}</span> {label}
+                <span className="font-bold text-slate-800">{stats[key]}</span> {label}
               </span>
             ))}
           </div>
 
-          <div className="mt-4 grid grid-cols-7 gap-1.5 text-center">
+          <div className="mt-3.5 grid grid-cols-7 gap-1.5 text-center">
             {WEEKDAYS.map((d) => (
-              <div key={d} className="pb-1 text-[11px] font-medium uppercase text-slate-400">
+              <div key={d} className="pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 {d}
               </div>
             ))}
@@ -147,15 +162,15 @@ export default function AttendanceCalendarCard({
               return (
                 <div
                   key={i}
-                  className={`rounded-lg border px-1 py-1.5 text-xs ${
-                    day.inMonth ? "" : "opacity-0"
-                  } ${style || "border-transparent text-slate-300"} ${
-                    day.isToday ? "ring-2 ring-indigo-400" : ""
+                  className={`rounded-xl border px-1 py-1.5 text-xs transition-all ${
+                    day.inMonth ? "" : "opacity-0 pointer-events-none"
+                  } ${style || "border-slate-100 text-slate-300 bg-white"} ${
+                    day.isToday ? "ring-2 ring-brand-500 font-bold" : ""
                   }`}
                 >
-                  <div className="font-medium">{day.date.getDate()}</div>
+                  <div className="font-bold text-[11px]">{day.date.getDate()}</div>
                   {day.status && (
-                    <div className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-wide">
+                    <div className="mt-0.5 truncate text-[8px] font-bold uppercase tracking-wide">
                       {day.status}
                     </div>
                   )}
@@ -167,25 +182,25 @@ export default function AttendanceCalendarCard({
       ) : (
         <div className="mt-4 max-h-80 space-y-2 overflow-y-auto">
           {recent.length === 0 && (
-            <p className="py-6 text-center text-sm text-slate-400">
-              No attendance recorded yet.
+            <p className="py-8 text-center text-xs text-slate-400">
+              No recent attendance logs recorded.
             </p>
           )}
           {recent.map((rec) => (
             <div
               key={rec.id}
-              className={`flex items-center justify-between rounded-lg border-l-4 bg-slate-50 py-2 pl-3 pr-3 text-sm ${
+              className={`flex items-center justify-between rounded-xl border border-slate-200/60 border-l-4 bg-slate-50/60 py-2.5 pl-3 pr-3 text-xs transition-colors hover:bg-slate-50 ${
                 recentBorder[rec.status] ?? "border-l-slate-300"
               }`}
             >
               <div>
-                <p className="font-medium text-slate-800">{formatDate(rec.date)}</p>
-                <p className="text-xs text-slate-500">
+                <p className="font-bold text-xs text-slate-800">{formatDate(rec.date)}</p>
+                <p className="text-[11px] text-slate-400">
                   {formatTime(rec.checkIn)} → {formatTime(rec.checkOut)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-semibold text-slate-700">
+                <p className="text-xs font-bold text-slate-800 mb-0.5">
                   {workHours(rec.checkIn, rec.checkOut)}
                 </p>
                 <Badge label={rec.status} />

@@ -7,9 +7,17 @@ import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { canManageDocuments, canViewDocument } from "@/lib/hr";
 import type { DocumentCategory } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const categories: DocumentCategory[] = [
   "Policy",
@@ -72,25 +80,23 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className={`${inputClass} sm:max-w-[200px]`}
-        >
-          <option value="All">All Categories</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="sm:max-w-[190px]">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All Categories</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {canManage && (
-          <button
-            onClick={() => setOpen(true)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
+          <Button onClick={() => setOpen(true)}>
             + Upload Document
-          </button>
+          </Button>
         )}
       </div>
 
@@ -184,33 +190,43 @@ export default function DocumentsPage() {
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Category">
-              <select
-                className={inputClass}
+              <Select
                 value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value as DocumentCategory })
+                onValueChange={(val) =>
+                  setForm({ ...form, category: val as DocumentCategory })
                 }
               >
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
             <Field label="Owner">
-              <select
-                className={inputClass}
-                value={form.employeeId}
-                onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
+              <Select
+                value={form.employeeId || "company-wide"}
+                onValueChange={(val) =>
+                  setForm({ ...form, employeeId: val === "company-wide" ? "" : val })
+                }
               >
-                <option value="">Company-wide</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Owner" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="company-wide">Company-wide</SelectItem>
+                  {employees.map((emp) => (
+                    <SelectItem key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
           </div>
           <Field label="File name (optional — demo only, no real upload)">
@@ -222,19 +238,16 @@ export default function DocumentsPage() {
             />
           </Field>
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setOpen(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
+            </Button>
+            <Button type="submit">
               Upload
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>

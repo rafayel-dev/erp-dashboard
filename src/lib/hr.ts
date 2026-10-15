@@ -24,12 +24,32 @@ export function isAdminOrHR(role: Role): boolean {
   return role === "Admin" || role === "HR";
 }
 
+export function isFinance(role: Role): boolean {
+  return role === "Finance";
+}
+
+export function isITAdmin(role: Role): boolean {
+  return role === "IT Admin";
+}
+
 export function canManageEmployees(role: Role): boolean {
   return isAdminOrHR(role);
 }
 
 export function canManageAssets(role: Role): boolean {
-  return isAdminOrHR(role);
+  return isAdminOrHR(role) || role === "IT Admin";
+}
+
+export function canManagePayroll(role: Role): boolean {
+  return isAdminOrHR(role) || role === "Finance";
+}
+
+export function canManageExpenses(role: Role): boolean {
+  return isAdminOrHR(role) || role === "Finance";
+}
+
+export function canManageHelpdesk(role: Role): boolean {
+  return isAdminOrHR(role) || role === "IT Admin";
 }
 
 export function canManageShifts(role: Role): boolean {
@@ -40,7 +60,16 @@ export function canManageShifts(role: Role): boolean {
  *  first shift if the id isn't found — mirrors mockData's getShift() but
  *  reactive to shifts created/edited/deleted at runtime. */
 export function findShift(shiftList: Shift[], id: string): Shift {
-  return shiftList.find((s) => s.id === id) ?? shiftList[0];
+  const found = shiftList.find((s) => s.id === id);
+  if (found) return found;
+  if (shiftList.length > 0) return shiftList[0];
+  return {
+    id: "shift-default",
+    name: "General Office",
+    startTime: "09:00",
+    endTime: "17:00",
+    graceMinutes: 15,
+  };
 }
 
 /** Can `viewer` approve/reject leave or mark attendance for `target`? */
@@ -65,7 +94,7 @@ export function canResolveAttendanceIssue(viewer: Employee, target: Employee): b
 
 /** Which employees' payroll/attendance rows should `viewer` see by default? */
 export function visibleScope(viewer: Employee, all: Employee[]): Employee[] {
-  if (isAdminOrHR(viewer.role)) return all;
+  if (isAdminOrHR(viewer.role) || viewer.role === "Finance" || viewer.role === "IT Admin") return all;
   if (viewer.role === "Manager") {
     return all.filter((e) => e.id === viewer.id || e.supervisorId === viewer.id);
   }
@@ -124,6 +153,7 @@ export function activeLeaveStep(steps: LeaveApprovalStep[]): LeaveApprovalStep |
 
 /** Can `viewer` act on this request's current step right now? */
 export function canActOnLeaveStep(viewer: Employee, request: LeaveRequest): boolean {
+  if (viewer.id === request.employeeId) return false; // Prevent self-approval of own leave request
   const step = activeLeaveStep(request.approvalSteps);
   if (!step) return false;
   if (isAdminOrHR(viewer.role)) return true; // Admin/HR can override any step

@@ -7,9 +7,17 @@ import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
 import Modal from "@/components/ui/Modal";
 import Field, { inputClass } from "@/components/ui/Field";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { canManageAssets } from "@/lib/hr";
 import type { Asset, AssetCategory } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const categories: AssetCategory[] = [
   "Laptop",
@@ -107,25 +115,23 @@ export default function AssetsPage() {
             placeholder="Search by name or serial number…"
             className={`${inputClass} sm:max-w-xs`}
           />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className={`${inputClass} sm:max-w-[180px]`}
-          >
-            <option value="All">All Statuses</option>
-            <option value="Available">Available</option>
-            <option value="Allocated">Allocated</option>
-            <option value="In Repair">In Repair</option>
-            <option value="Retired">Retired</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="sm:max-w-[180px]">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Statuses</SelectItem>
+              <SelectItem value="Available">Available</SelectItem>
+              <SelectItem value="Allocated">Allocated</SelectItem>
+              <SelectItem value="In Repair">In Repair</SelectItem>
+              <SelectItem value="Retired">Retired</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {canManage && (
-          <button
-            onClick={() => setAddOpen(true)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
+          <Button onClick={() => setAddOpen(true)}>
             + Add Asset
-          </button>
+          </Button>
         )}
       </div>
 
@@ -258,19 +264,23 @@ export default function AssetsPage() {
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Category">
-              <select
-                className={inputClass}
+              <Select
                 value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value as AssetCategory })
+                onValueChange={(val) =>
+                  setForm({ ...form, category: val as AssetCategory })
                 }
               >
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
             <Field label="Serial Number">
               <input
@@ -298,19 +308,16 @@ export default function AssetsPage() {
             />
           </Field>
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setAddOpen(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
+            </Button>
+            <Button type="submit">
               Add Asset
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>
@@ -322,33 +329,34 @@ export default function AssetsPage() {
       >
         <form onSubmit={handleAssignSubmit} className="space-y-4">
           <Field label="Employee">
-            <select
-              className={inputClass}
-              value={assignEmployeeId}
-              onChange={(e) => setAssignEmployeeId(e.target.value)}
+            <Select
+              value={assignEmployeeId || "none"}
+              onValueChange={(val) => setAssignEmployeeId(val === "none" ? "" : val)}
             >
-              <option value="">— Select —</option>
-              {employees.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Employee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Select Employee —</SelectItem>
+                {employees.map((emp) => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setAssignTarget(null)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
+            </Button>
+            <Button type="submit">
               Assign
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>

@@ -8,7 +8,7 @@ import { formatCurrency } from "@/lib/format";
 export default function ReportsPage() {
   const { employees, attendance, leaveRequests, payrollRecords, assets, activeEmployee } = useAppData();
 
-  if (activeEmployee.role === "Employee") {
+  if (activeEmployee.role === "Employee" || activeEmployee.role === "IT Admin") {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center text-center p-6 bg-white rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-bold text-xl mb-3">
@@ -16,7 +16,7 @@ export default function ReportsPage() {
         </div>
         <h2 className="text-base font-bold text-slate-900">Access Restricted</h2>
         <p className="mt-1 text-xs text-slate-500 max-w-md leading-relaxed">
-          The Executive Reports &amp; Analytics Hub is restricted to Admin, HR, and Management roles only.
+          The Executive Reports &amp; Analytics Hub is restricted to Admin, HR, Finance, and Management roles only.
         </p>
       </div>
     );
